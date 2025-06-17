@@ -1,0 +1,374 @@
+{
+  "name": "Manual Test - Social Media Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "triggerTimes": {
+          "item": [
+            {
+              "mode": "manual"
+            }
+          ]
+        }
+      },
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        250,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "test_topic",
+              "value": "AI automation benefits for businesses"
+            },
+            {
+              "name": "test_platform",
+              "value": "twitter"
+            },
+            {
+              "name": "test_timestamp",
+              "value": "={{$now.toISOString()}}"
+            }
+          ]
+        },
+        "options": {},
+        "keepOnlySet": true
+      },
+      "name": "Test Data Setup",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        450,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Simulate AI content generation\nconst topic = $input.first().json.test_topic;\nconst platform = $input.first().json.test_platform;\n\n// Mock AI response\nconst mockResponse = {\n  post: `Discover how ${topic} can transform your business! 🚀 Our latest insights show that companies using automation see 40% increase in efficiency.`,\n  hashtags: ['#automation', '#business', '#efficiency', '#AI'],\n  cta: 'Learn more in our latest guide!'\n};\n\n// Platform-specific formatting\nlet formattedContent = '';\nlet charCount = 0;\nlet status = 'SUCCESS';\n\nswitch(platform) {\n  case 'twitter':\n    formattedContent = `${mockResponse.post}\\n\\n${mockResponse.hashtags.join(' ')}\\n\\n${mockResponse.cta}`;\n    charCount = formattedContent.length;\n    if (charCount > 280) {\n      status = 'WARNING: Exceeds Twitter limit';\n    }\n    break;\n    \n  case 'linkedin':\n    formattedContent = `${mockResponse.post}\\n\\n${mockResponse.hashtags.join(' ')}\\n\\n${mockResponse.cta}`;\n    charCount = formattedContent.length;\n    break;\n    \n  case 'facebook':\n    formattedContent = `${mockResponse.post}\\n\\n${mockResponse.hashtags.join(' ')}\\n\\n${mockResponse.cta}`;\n    charCount = formattedContent.length;\n    break;\n}\n\nreturn {\n  test_results: {\n    platform: platform,\n    topic: topic,\n    generated_content: mockResponse,\n    formatted_content: formattedContent,\n    character_count: charCount,\n    status: status,\n    timestamp: new Date().toISOString()\n  }\n};"
+      },
+      "name": "Content Generation Test",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        650,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.test_results.platform}}",
+              "operation": "equal",
+              "value2": "twitter"
+            }
+          ]
+        }
+      },
+      "name": "Platform Router Test",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        850,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "test_result",
+              "value": "✅ Twitter Test Passed"
+            },
+            {
+              "name": "content_preview",
+              "value": "={{$json.test_results.formatted_content.substring(0, 100)}}..."
+            },
+            {
+              "name": "char_count",
+              "value": "={{$json.test_results.character_count}}"
+            },
+            {
+              "name": "status",
+              "value": "={{$json.test_results.status}}"
+            }
+          ]
+        },
+        "options": {},
+        "keepOnlySet": true
+      },
+      "name": "Twitter Test Result",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        1050,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "test_result",
+              "value": "✅ LinkedIn Test Passed"
+            },
+            {
+              "name": "content_preview",
+              "value": "={{$json.test_results.formatted_content.substring(0, 100)}}..."
+            },
+            {
+              "name": "char_count",
+              "value": "={{$json.test_results.character_count}}"
+            },
+            {
+              "name": "status",
+              "value": "={{$json.test_results.status}}"
+            }
+          ]
+        },
+        "options": {},
+        "keepOnlySet": true
+      },
+      "name": "LinkedIn Test Result",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        1050,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "test_result",
+              "value": "✅ Facebook Test Passed"
+            },
+            {
+              "name": "content_preview",
+              "value": "={{$json.test_results.formatted_content.substring(0, 100)}}..."
+            },
+            {
+              "name": "char_count",
+              "value": "={{$json.test_results.character_count}}"
+            },
+            {
+              "name": "status",
+              "value": "={{$json.test_results.status}}"
+            }
+          ]
+        },
+        "options": {},
+        "keepOnlySet": true
+      },
+      "name": "Facebook Test Result",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        1050,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "notification_test",
+              "value": "✅ Email notification would be sent"
+            },
+            {
+              "name": "recipient",
+              "value": "team@youragency.com"
+            },
+            {
+              "name": "subject",
+              "value": "=Social Media Post Test - {{$json.test_results.platform}}"
+            },
+            {
+              "name": "content_summary",
+              "value": "={{$json.test_results.generated_content.post.substring(0, 50)}}..."
+            }
+          ]
+        },
+        "options": {},
+        "keepOnlySet": true
+      },
+      "name": "Notification Test",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        1250,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "analytics_test",
+              "value": "✅ Analytics would be logged"
+            },
+            {
+              "name": "platform",
+              "value": "={{$json.test_results.platform}}"
+            },
+            {
+              "name": "post_length",
+              "value": "={{$json.test_results.generated_content.post.length}}"
+            },
+            {
+              "name": "hashtag_count",
+              "value": "={{$json.test_results.generated_content.hashtags.length}}"
+            },
+            {
+              "name": "timestamp",
+              "value": "={{$json.test_results.timestamp}}"
+            }
+          ]
+        },
+        "options": {},
+        "keepOnlySet": true
+      },
+      "name": "Analytics Test",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        1450,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Test Data Setup",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Test Data Setup": {
+      "main": [
+        [
+          {
+            "node": "Content Generation Test",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Content Generation Test": {
+      "main": [
+        [
+          {
+            "node": "Platform Router Test",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Platform Router Test": {
+      "main": [
+        [
+          {
+            "node": "Twitter Test Result",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "LinkedIn Test Result",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Facebook Test Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Twitter Test Result": {
+      "main": [
+        [
+          {
+            "node": "Notification Test",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkedIn Test Result": {
+      "main": [
+        [
+          {
+            "node": "Notification Test",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Facebook Test Result": {
+      "main": [
+        [
+          {
+            "node": "Notification Test",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notification Test": {
+      "main": [
+        [
+          {
+            "node": "Analytics Test",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": ""
+  },
+  "versionId": "1.0.0",
+  "meta": {
+    "instanceId": "manual-test-social-media"
+  },
+  "tags": [
+    "test",
+    "manual",
+    "social-media",
+    "automation"
+  ]
+} 

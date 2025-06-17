@@ -1,0 +1,371 @@
+{
+  "name": "Test Social Media Automation Suite",
+  "nodes": [
+    {
+      "parameters": {
+        "triggerTimes": {
+          "item": [
+            {
+              "mode": "everyX",
+              "value": 5,
+              "unit": "minutes"
+            }
+          ]
+        }
+      },
+      "name": "Test Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [
+        250,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "platform",
+              "value": "twitter"
+            },
+            {
+              "name": "topic",
+              "value": "AI automation benefits for businesses"
+            },
+            {
+              "name": "scheduled_time",
+              "value": "={{$now.toISOString()}}"
+            },
+            {
+              "name": "status",
+              "value": "pending"
+            }
+          ]
+        },
+        "options": {},
+        "keepOnlySet": true
+      },
+      "name": "Test Content Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        450,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "apiKey",
+        "operation": "completion",
+        "model": "gpt-4",
+        "prompt": "Create engaging social media content for {{$json.platform}} based on this topic: {{$json.topic}}. Include relevant hashtags and a call to action. Format: {post: 'main content', hashtags: ['tag1', 'tag2'], cta: 'call to action'}",
+        "options": {
+          "temperature": 0.7,
+          "maxTokens": 500
+        }
+      },
+      "name": "Test Content Generator",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [
+        650,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.platform}}",
+              "operation": "equal",
+              "value2": "twitter"
+            }
+          ]
+        }
+      },
+      "name": "Test Platform Router",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        850,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "status",
+              "value": "TEST - Would post to Twitter"
+            },
+            {
+              "name": "content",
+              "value": "={{$json.post}}\n\n{{$json.hashtags.join(' ')}}\n\n{{$json.cta}}"
+            },
+            {
+              "name": "timestamp",
+              "value": "={{$now.toISOString()}}"
+            }
+          ]
+        },
+        "options": {},
+        "keepOnlySet": true
+      },
+      "name": "Test Twitter Post",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        1050,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "status",
+              "value": "TEST - Would post to LinkedIn"
+            },
+            {
+              "name": "content",
+              "value": "={{$json.post}}\n\n{{$json.hashtags.join(' ')}}\n\n{{$json.cta}}"
+            },
+            {
+              "name": "timestamp",
+              "value": "={{$now.toISOString()}}"
+            }
+          ]
+        },
+        "options": {},
+        "keepOnlySet": true
+      },
+      "name": "Test LinkedIn Post",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        1050,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "status",
+              "value": "TEST - Would post to Facebook"
+            },
+            {
+              "name": "content",
+              "value": "={{$json.post}}\n\n{{$json.hashtags.join(' ')}}\n\n{{$json.cta}}"
+            },
+            {
+              "name": "timestamp",
+              "value": "={{$now.toISOString()}}"
+            }
+          ]
+        },
+        "options": {},
+        "keepOnlySet": true
+      },
+      "name": "Test Facebook Post",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        1050,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "notification",
+              "value": "=TEST - Would send email notification for {{$json.platform}} post"
+            },
+            {
+              "name": "content_preview",
+              "value": "={{$json.post.substring(0, 100)}}..."
+            },
+            {
+              "name": "timestamp",
+              "value": "={{$now.toISOString()}}"
+            }
+          ]
+        },
+        "options": {},
+        "keepOnlySet": true
+      },
+      "name": "Test Notification",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        1250,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "analytics_log",
+              "value": "=TEST - Would log to analytics sheet"
+            },
+            {
+              "name": "platform",
+              "value": "={{$json.platform}}"
+            },
+            {
+              "name": "post_length",
+              "value": "={{$json.post.length}}"
+            },
+            {
+              "name": "hashtag_count",
+              "value": "={{$json.hashtags.length}}"
+            },
+            {
+              "name": "timestamp",
+              "value": "={{$now.toISOString()}}"
+            }
+          ]
+        },
+        "options": {},
+        "keepOnlySet": true
+      },
+      "name": "Test Analytics Logger",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        1450,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Test Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Test Content Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Test Content Data": {
+      "main": [
+        [
+          {
+            "node": "Test Content Generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Test Content Generator": {
+      "main": [
+        [
+          {
+            "node": "Test Platform Router",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Test Platform Router": {
+      "main": [
+        [
+          {
+            "node": "Test Twitter Post",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Test LinkedIn Post",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Test Facebook Post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Test Twitter Post": {
+      "main": [
+        [
+          {
+            "node": "Test Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Test LinkedIn Post": {
+      "main": [
+        [
+          {
+            "node": "Test Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Test Facebook Post": {
+      "main": [
+        [
+          {
+            "node": "Test Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Test Notification": {
+      "main": [
+        [
+          {
+            "node": "Test Analytics Logger",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": ""
+  },
+  "versionId": "1.0.0",
+  "meta": {
+    "instanceId": "test-social-media-automation"
+  },
+  "tags": [
+    "test",
+    "social-media",
+    "automation",
+    "content"
+  ]
+} 

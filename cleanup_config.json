@@ -1,0 +1,34 @@
+{
+    "target_folders": [
+        "~/Documents/YO-cosmetic",
+        "~/Downloads/YO-assets",
+        "~/Desktop/product-labels"
+    ],
+    "compression_threshold_mb": 500,
+    "cloud_storage_priority": [
+        "nordlocker",
+        "google_drive",
+        "dropbox",
+        "pcloud",
+        "onedrive"
+    ],
+    "security": {
+        "require_vpn": true,
+        "secure_deletion_passes": 3,
+        "hash_algorithm": "sha256"
+    },
+    "backup": {
+        "create_backup": false,
+        "backup_location": "~/Backups/file_cleanup_backup"
+    },
+    "logging": {
+        "log_level": "INFO",
+        "log_file": "file_cleanup.log",
+        "transfer_log": "files_transferred_log.txt"
+    },
+    "advanced": {
+        "max_concurrent_uploads": 3,
+        "upload_timeout_seconds": 300,
+        "compression_level": 6
+    }
+} 
