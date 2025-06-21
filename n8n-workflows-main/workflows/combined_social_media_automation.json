@@ -1,0 +1,236 @@
+{
+  "name": "Combined Social Media Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "triggerTimes": {
+          "item": [
+            {
+              "mode": "everyX",
+              "value": 1,
+              "unit": "hours"
+            }
+          ]
+        }
+      },
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "read",
+        "resource": "sheet",
+        "spreadsheetId": "={{$node[\"Google Sheets\"].json[\"id\"]}}",
+        "range": "Content!A1:Z1000"
+      },
+      "name": "Content Calendar",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 2,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "authentication": "apiKey",
+        "operation": "completion",
+        "model": "gpt-4",
+        "prompt": "Create engaging social media content for {{$json.platform}} based on this topic: {{$json.topic}}. Include relevant hashtags and a call to action. Format: {post: 'main content', hashtags: ['tag1','tag2'], cta:'call to action'}",
+        "options": {
+          "temperature": 0.7,
+          "maxTokens": 500
+        }
+      },
+      "name": "Content Generator",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "authentication": "apiKey",
+        "operation": "image",
+        "prompt": "Generate a square promotional image for {{$json.topic}}",
+        "size": "1024x1024"
+      },
+      "name": "Image Generator",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://api.example.com/video",
+        "method": "POST",
+        "sendBinaryData": true,
+        "jsonParameters": true,
+        "options": {},
+        "bodyParametersJson": "={\n  \"image_url\": {{$node['Image Generator'].json['data'][0]['url']}},\n  \"caption\": {{$node['Content Generator'].json['post']}}\n}"
+      },
+      "name": "Video Generator",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 2,
+      "position": [1050, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.platform}}",
+              "operation": "equal",
+              "value2": "twitter"
+            }
+          ]
+        }
+      },
+      "name": "Platform Router",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1250, 300]
+    },
+    {
+      "parameters": {
+        "authentication": "oauth2",
+        "text": "={{$json.post}}\n\n{{$json.hashtags.join(' ')}}\n\n{{$json.cta}}",
+        "additionalFields": {}
+      },
+      "name": "Twitter Post",
+      "type": "n8n-nodes-base.twitter",
+      "typeVersion": 2,
+      "position": [1450, 100]
+    },
+    {
+      "parameters": {
+        "authentication": "oauth2",
+        "text": "={{$json.post}}\n\n{{$json.hashtags.join(' ')}}\n\n{{$json.cta}}",
+        "postAs": "organization",
+        "organization": "={{$env.LINKEDIN_ORG_ID}}",
+        "additionalFields": {},
+        "shareMediaCategory": "IMAGE"
+      },
+      "name": "LinkedIn Post",
+      "type": "n8n-nodes-base.linkedIn",
+      "typeVersion": 1,
+      "position": [1450, 200]
+    },
+    {
+      "parameters": {
+        "authentication": "oauth2",
+        "edge": "photos",
+        "node": "={{$env.FACEBOOK_PAGE_ID}}",
+        "options": {
+          "queryParameters": {
+            "parameter": []
+          }
+        },
+        "additionalFields": {
+          "message": "={{$json.post}}\n\n{{$json.hashtags.join(' ')}}\n\n{{$json.cta}}"
+        }
+      },
+      "name": "Facebook Post",
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [1450, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://api.upload-post.com/instagram",
+        "method": "POST",
+        "jsonParameters": true,
+        "bodyParametersJson": "={\n  \"caption\": {{$node['Content Generator'].json['post']}},\n  \"image_url\": {{$node['Image Generator'].json['data'][0]['url']}}\n}"
+      },
+      "name": "Instagram Post",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 2,
+      "position": [1450, 400]
+    },
+    {
+      "parameters": {
+        "url": "https://api.upload-post.com/tiktok",
+        "method": "POST",
+        "jsonParameters": true,
+        "bodyParametersJson": "={\n  \"video_url\": {{$node['Video Generator'].json['data']['url']}},\n  \"caption\": {{$node['Content Generator'].json['post']}}\n}"
+      },
+      "name": "TikTok Post",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 2,
+      "position": [1450, 500]
+    },
+    {
+      "parameters": {
+        "authentication": "oauth2",
+        "video": "={{$node['Video Generator'].binary.data}}",
+        "title": "={{$json.topic}}",
+        "description": "={{$node['Content Generator'].json['post']}}",
+        "additionalFields": {}
+      },
+      "name": "YouTube Post",
+      "type": "n8n-nodes-base.youtube",
+      "typeVersion": 1,
+      "position": [1450, 600]
+    },
+    {
+      "parameters": {
+        "fromEmail": "notify@example.com",
+        "toEmail": "team@example.com",
+        "subject": "New Post Published",
+        "text": "={{'Post published to ' + $json.platform}}"
+      },
+      "name": "Notification Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [1650, 300]
+    },
+    {
+      "parameters": {
+        "resource": "sheet",
+        "operation": "append",
+        "authentication": "serviceAccount",
+        "spreadsheetId": "={{$node[\"Google Sheets\"].json[\"id\"]}}",
+        "range": "Analytics!A1",
+        "options": {
+          "valueInputMode": "USER_ENTERED"
+        },
+        "value": "={{[$json.platform,$json.post,$json.hashtags.join(' '),$node['Video Generator'].json['data']['url'] || '']}}"
+      },
+      "name": "Analytics Logger",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 2,
+      "position": [1850, 300]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {"main": [[{"node": "Content Calendar","type": "main","index": 0}]]},
+    "Content Calendar": {"main": [[{"node": "Content Generator","type": "main","index": 0}]]},
+    "Content Generator": {"main": [[{"node": "Image Generator","type": "main","index": 0}]]},
+    "Image Generator": {"main": [[{"node": "Video Generator","type": "main","index": 0}]]},
+    "Video Generator": {"main": [[{"node": "Platform Router","type": "main","index": 0}]]},
+    "Platform Router": {
+      "main": [
+        [{"node": "Twitter Post","type": "main","index": 0}],
+        [{"node": "LinkedIn Post","type": "main","index": 0}],
+        [{"node": "Facebook Post","type": "main","index": 0}],
+        [{"node": "Instagram Post","type": "main","index": 0}],
+        [{"node": "TikTok Post","type": "main","index": 0}],
+        [{"node": "YouTube Post","type": "main","index": 0}]
+      ]
+    },
+    "Twitter Post": {"main": [[{"node": "Notification Email","type": "main","index": 0}]]},
+    "LinkedIn Post": {"main": [[{"node": "Notification Email","type": "main","index": 0}]]},
+    "Facebook Post": {"main": [[{"node": "Notification Email","type": "main","index": 0}]]},
+    "Instagram Post": {"main": [[{"node": "Notification Email","type": "main","index": 0}]]},
+    "TikTok Post": {"main": [[{"node": "Notification Email","type": "main","index": 0}]]},
+    "YouTube Post": {"main": [[{"node": "Notification Email","type": "main","index": 0}]]},
+    "Notification Email": {"main": [[{"node": "Analytics Logger","type": "main","index": 0}]]}
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true
+  },
+  "versionId": "1.0.0",
+  "meta": {"instanceId": "combined-social-media"},
+  "tags": ["social-media","automation","video","image"]
+}

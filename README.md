@@ -65,6 +65,10 @@ This project implements a zero-trust architecture with:
 - Network segmentation
 - Real-time security monitoring
 - Comprehensive audit logging
+## Combined Social Media Automation Workflow
+
+A new n8n workflow `combined_social_media_automation.json` automates posting across Facebook, Instagram, TikTok and YouTube with AI image and video generation. Import it from `n8n-workflows-main/workflows` to get started.
+
 
 ## License
 

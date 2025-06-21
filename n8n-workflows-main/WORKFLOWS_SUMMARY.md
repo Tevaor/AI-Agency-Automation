@@ -2054,3 +2054,4 @@ This file lists each workflow JSON file and its `name` field extracted from the 
 | 🤖 Telegram Messaging Agent for Text_Audio_Images.json | 🤖 Telegram Messaging Agent for Text/Audio/Images |
 | 🤖🧑_💻 AI Agent for Top n8n Creators Leaderboard Reporting.json | 🤖🧑‍💻 AI Agent for Top n8n Creators Leaderboard Reporting |
 | 🤖🧠 AI Agent Chatbot + LONG TERM Memory + Note Storage + Telegram.json | 🤖🧠 AI Agent Chatbot + LONG TERM Memory + Note Storage + Telegram |
+| combined_social_media_automation.json | Combined Social Media Automation |
