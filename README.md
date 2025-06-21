@@ -66,6 +66,18 @@ This project implements a zero-trust architecture with:
 - Real-time security monitoring
 - Comprehensive audit logging
 
+## Social Media Automation Dashboard
+
+The project includes a lightweight Flask UI for managing social media content.
+After installing the dependencies you can launch it with:
+
+```bash
+python web_interface.py
+```
+
+Then open your browser at [http://localhost:5000](http://localhost:5000) to view
+the dashboard and publish posts.
+
 ## License
 
-Proprietary - All rights reserved 
+Proprietary - All rights reserved
